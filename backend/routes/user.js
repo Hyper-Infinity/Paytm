@@ -28,13 +28,15 @@ router.post('/signup', async (req, res) => {
         return;
     }
 
-    const hashedPassword = await newUser.createHash(req.body.password);
-    const newUser = await User.create({
+    const newUser = new User({
         userName: currUser.userName,
-        password: hashedPassword,
         firstName: currUser.firstName,
-        lastName: currUser.firstName
+        lastName: currUser.lastName
     })
+    const hashedPassword = await newUser.createHash(req.body.password);
+    newUser.password = hashedPassword;
+
+    await newUser.save();
 
     const userId = newUser._id;
 
@@ -63,7 +65,7 @@ router.post('/signin', async (req, res) => {
         return;
     }
 
-    const foundUser = await User.findOne({ email: currUser.userName });
+    const foundUser = await User.findOne({ userName: currUser.userName });
 
     if(!foundUser) {
         res.status(411).json({
@@ -89,20 +91,21 @@ router.post('/signin', async (req, res) => {
 })
 
 router.put('/', authMiddleware, async (req, res) => {
-    const body = req.body;
-    const { success } = userUpdate.safeParse(body);
+    const data = req.body;
+    const { success } = userUpdate.safeParse(data);
 
-    if(!body || !success) {
+    if(!data || !success) {
         return res.status(411).json({
             message: "Error while updating information"
         });
     }
 
-    if(body.password) {
-        const hashedPassword = await newUser.createHash(req.body.password);
-        body.password = hashedPassword;
+    const currUser = await User.findById(req.userId);
+    if(data.password != undefined) {
+        const hashedPassword = await currUser.createHash(data.password);
+        data.password = hashedPassword;
     }
-    await User.updateOne({_id: req.userId}, body);
+    await User.updateOne({_id: req.userId}, data);
     res.status(200).json({
         message: "Updated successfully"
     })

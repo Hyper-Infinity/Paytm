@@ -3,13 +3,14 @@ const { JWT_SECRET } = require("./config");
 
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(403).json({});
+    if (!authHeader) {
+        return res.status(403).json({
+            message: "error at position 1"
+        });
     }
 
-    const jwtToken = authHeader.split(" ")[1];
-
+    const jwtList = authHeader.split(' ');
+    const jwtToken = jwtList[1];
     try {
         const decoded = jwt.verify(jwtToken, JWT_SECRET);
         if(decoded.userId) {
@@ -17,11 +18,15 @@ const authMiddleware = (req, res, next) => {
             next();
         }
         else {
-            return res.status(403).json({});
+            return res.status(403).json({
+                message: "error at position 2"
+            });
         }
     } 
     catch (err) {
-        return res.status(403).json({});
+        return res.status(403).json({
+            message: "error at position 3"
+        });
     }
 }
 

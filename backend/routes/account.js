@@ -8,7 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/balance', async (req, res) => {
-    const userData = await Account.findById(req.userId);
+    const userData = await Account.findOne({userId: req.userId});
     res.status(200).json({
         balance: userData.balance
     })
@@ -44,13 +44,13 @@ router.post('/transfer', async (req, res) => {
             })
         }
 
-        await Account.findByIdAndUpdate(txnData.to, {
+        await Account.findOneAndUpdate({userId: txnData.to}, {
             $inc: {
                 balance: txnData.amount
             }
         })
 
-        await Account.findByIdAndUpdate(req.userId, {
+        await Account.findOneAndUpdate({userId: req.userId}, {
             $inc: {
                 balance: -txnData.amount
             }
