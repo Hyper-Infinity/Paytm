@@ -13,7 +13,7 @@ router.post('/signup', async (req, res) => {
     const val = userSignup.safeParse(currUser);
     if(!val.success) {
         res.status(411).json({
-            msg: "You entered wrong input !"
+            message: "You entered wrong input !"
         })
         return;
     }
@@ -23,7 +23,7 @@ router.post('/signup', async (req, res) => {
 
     if(ifExists) {
         res.status(411).json({
-            msg: "User already exists ! Try with different user name."
+            message: "User already exists ! Try with different user name."
         })
         return;
     }
@@ -50,6 +50,7 @@ router.post('/signup', async (req, res) => {
     }, JWT_SECRET);
 
     res.status(200).json({
+        id: userId,
         token,
         message: "User created successfully.",
     });
@@ -60,7 +61,7 @@ router.post('/signin', async (req, res) => {
     const val = userSignin.safeParse(currUser);
     if(!val.success) {
         res.status(411).json({
-            msg: "You entered wrong input !"
+            message: "You entered wrong input !"
         })
         return;
     }
@@ -80,6 +81,9 @@ router.post('/signin', async (req, res) => {
             userId
         }, JWT_SECRET);
         res.status(200).json({
+            id: foundUser._id,
+            firstName: foundUser.firstName,
+            lastName: foundUser.lastName,
             token
         })
     }
